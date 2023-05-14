@@ -9,7 +9,6 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.LongValue;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent.SpecialSpawn;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -21,7 +20,6 @@ public class MobDespawnTimers {
 
 	public static final String MODID = "despawntimers";
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
-	public static final String SPAWN_TIME = MODID + ".spawntime";
 
 	public MobDespawnTimers() {
 		MinecraftForge.EVENT_BUS.register(this);
@@ -29,16 +27,9 @@ public class MobDespawnTimers {
 	}
 
 	@SubscribeEvent
-	public void onSpawn(SpecialSpawn e) {
-		Entity ent = e.getEntity();
-		ent.getPersistentData().putLong(SPAWN_TIME, ent.level.getGameTime());
-	}
-
-	@SubscribeEvent
 	public void onDespawn(AllowDespawn e) {
 		Entity ent = e.getEntity();
-		long time = ent.getPersistentData().getLong(SPAWN_TIME);
-		if (time != 0 && Config.getDespawnDelay() > ent.getLevel().getGameTime() - time) {
+		if (Config.getDespawnDelay() >= ent.tickCount) {
 			e.setResult(Result.DENY);
 		}
 	}
